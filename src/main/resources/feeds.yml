@@ -1,0 +1,11 @@
+feeds:
+  heise:
+    url: https://www.heise.de/rss/heise-atom.xml
+    selectors:
+      - .article-content
+    removes:
+      - footer
+  engadget:
+    url: https://www.engadget.com/rss.xml
+    selectors:
+      - .article-text
