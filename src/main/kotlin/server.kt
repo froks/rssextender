@@ -18,7 +18,6 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.html.*
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -33,11 +32,10 @@ val RESPONSE_CACHE: LoadingCache<String, Deferred<OutgoingContent>> = CacheBuild
     })
 
 
-@KtorExperimentalAPI
 fun main() {
-    val port = System.getProperty("RSSEXTENDER_PORT")?.toInt() ?: 8080
-    val host = System.getProperty("RSSEXTENDER_BIND") ?: "0.0.0.0"
-    val apiKey = System.getProperty("RSSEXTENDER_APIKEY") ?: UUID.randomUUID().toString()
+    val port = System.getenv("RSSEXTENDER_PORT")?.toInt() ?: 8080
+    val host = System.getenv("RSSEXTENDER_BIND") ?: "0.0.0.0"
+    val apiKey = System.getenv("RSSEXTENDER_APIKEY") ?: UUID.randomUUID().toString()
 
     println("RSSExtender starting on $host:$port with apikey $apiKey")
 

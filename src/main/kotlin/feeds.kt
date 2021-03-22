@@ -20,7 +20,6 @@ import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
 import java.io.ByteArrayInputStream
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import kotlin.system.measureNanoTime
@@ -29,7 +28,7 @@ val XML11_PATTERN =
     Regex("[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800-\\uDC00-\\uDBFF-\\uFFFF\\x{10000}-\\x{10FFFF}]")
 
 val RAW_FEED_CACHE_EXPIRY: Duration = Duration.ofMinutes(5)
-val ARTICLE_CACHE_EXPIRY: Duration = Duration.ofHours(24)
+val ARTICLE_CACHE_EXPIRY: Duration = Duration.ofDays(7)
 
 val client = HttpClient()
 
@@ -103,9 +102,11 @@ suspend fun retrieve(feed: String): OutgoingContent {
                 }
                 .forEach {
                     val content = SyndContentImpl()
-                    content.type = ContentType.Text.Html.contentType
+                    content.type = "html"
                     content.value = it.value.get()
-                    it.key.contents = listOf(content)
+
+                    it.key.description = content
+                    it.key.contents = emptyList() // listOf(content)
                 }
         }
         println("Getting $feed took ${nanos / 1e6} ms")
@@ -124,3 +125,7 @@ data class ArticleIdentifier(
     val feed: String,
     val link: String,
 )
+
+suspend fun main() {
+    println(String((retrieve("heise") as ByteArrayContent).bytes()))
+}
