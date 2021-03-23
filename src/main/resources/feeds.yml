@@ -5,6 +5,8 @@ feeds:
       - .article-content
     removes:
       - footer
+      - a-collapse
+      - a-paid-content-teaser
   engadget:
     url: https://www.engadget.com/rss.xml
     selectors:
