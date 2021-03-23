@@ -2,11 +2,18 @@ feeds:
   heise:
     url: https://www.heise.de/rss/heise-atom.xml
     selectors:
-      - .article-content
+      - div.article-content
     removes:
       - footer
       - a-collapse
       - a-paid-content-teaser
+      - a-ad
+      - a-paternoster
+      - aside
+      - figure[class="branding"]
+      - img[alt="Mehr von Mac & i"]
+      - :has(a[href^="mailto"])
+      - div[class*="ring-mini-gallery-wrapper"]
   engadget:
     url: https://www.engadget.com/rss.xml
     selectors:

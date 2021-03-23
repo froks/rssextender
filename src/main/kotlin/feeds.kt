@@ -72,7 +72,7 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Future<String>> = Ca
                     soup.select(it).remove()
                 }
 
-                Jsoup.clean(soup.toString(), Whitelist.basicWithImages()).replace(XML11_PATTERN, "")
+                Jsoup.clean(soup.toString(), Whitelist.relaxed()).replace(XML11_PATTERN, "")
             }.asCompletableFuture()
         }
     })
@@ -127,5 +127,8 @@ data class ArticleIdentifier(
 )
 
 suspend fun main() {
+//    val p = Jsoup.parse(File("C:/Users/flo/x"), Charsets.UTF_8.toString())
+//    val s = p.select(".article-content")
+//    println(Jsoup.clean(s.toString(), Whitelist.basicWithImages()).replace(XML11_PATTERN, ""))
     println(String((retrieve("heise") as ByteArrayContent).bytes()))
 }

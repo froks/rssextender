@@ -1,3 +1,4 @@
+import ch.qos.logback.classic.util.ContextInitializer
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
@@ -19,9 +20,11 @@ import io.ktor.util.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.html.*
+import org.slf4j.event.Level
 import java.util.*
 import java.util.concurrent.TimeUnit
-
+import ch.qos.logback.classic.LoggerContext
+import org.slf4j.LoggerFactory
 
 val RESPONSE_CACHE: LoadingCache<String, Deferred<OutgoingContent>> = CacheBuilder
     .newBuilder()
@@ -31,8 +34,10 @@ val RESPONSE_CACHE: LoadingCache<String, Deferred<OutgoingContent>> = CacheBuild
             scope.async { retrieve(feed) }
     })
 
-
 fun main() {
+    val lc = LoggerFactory.getILoggerFactory() as LoggerContext
+    lc.getLogger("root").level = ch.qos.logback.classic.Level.INFO
+
     val port = System.getenv("RSSEXTENDER_PORT")?.toInt() ?: 8080
     val host = System.getenv("RSSEXTENDER_BIND") ?: "0.0.0.0"
     val apiKey = System.getenv("RSSEXTENDER_APIKEY") ?: UUID.randomUUID().toString()
@@ -40,8 +45,10 @@ fun main() {
     println("RSSExtender starting on $host:$port with apikey $apiKey")
 
     embeddedServer(Netty, port = port, host = host) {
+        install(CallLogging) {
+            level = Level.INFO
+        }
         install(DefaultHeaders)
-        install(CallLogging)
         routing {
             get("/") {
                 val feed = call.request.queryParameters["feed"]
