@@ -1,10 +1,6 @@
-Currently Work-In-Progress, but it does already work
+rss-extender is a super-fast configurable rss feed extender, which will extend a rss-feed with more content than originally included, by getting each linked article and processing the contents with definable css-selectors.
 
-rss-extender is supposed to be a super-fast configurable rss feed extender, which will put 
-more meaningful content into the feed, than in the original feed.
-
-The basic algorithm is to visit every link in the rss-feed, process the data with JSoup-selects
-and replace the content of the entry in the rss-feed and return the modified feed.
+It utilizes asynchronous ktor with kotlin coroutines for performance, as well as JSoup css-selectors for selecting and removing content in the linked articles.
 
 Environment:
 - RSSEXTENDER_PORT - Port on which the server shall start (default: 8080)
@@ -16,4 +12,4 @@ Supported feeds:
 - engadget
 
 URL:
-- http://localhost:8080/?feed=<feedname>&apikey=<secretapikey>
+- `http://localhost:8080/?feed=<feedname>&apikey=<secretapikey>`
