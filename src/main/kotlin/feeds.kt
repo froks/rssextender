@@ -7,6 +7,7 @@ import com.rometools.rome.io.SyndFeedInput
 import com.rometools.rome.io.SyndFeedOutput
 import com.rometools.rome.io.XmlReader
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -15,13 +16,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.future.asCompletableFuture
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
 import java.io.ByteArrayInputStream
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Future
 import kotlin.system.measureNanoTime
 
 val XML11_PATTERN =
@@ -30,7 +29,13 @@ val XML11_PATTERN =
 val RAW_FEED_CACHE_EXPIRY: Duration = Duration.ofMinutes(5)
 val ARTICLE_CACHE_EXPIRY: Duration = Duration.ofDays(7)
 
-val client = HttpClient()
+val client = HttpClient {
+    install(HttpTimeout) {
+        requestTimeoutMillis = 10000
+        connectTimeoutMillis = 10000
+        socketTimeoutMillis = 10000
+    }
+}
 
 val scope = CoroutineScope(Dispatchers.IO)
 
@@ -49,12 +54,12 @@ val RAW_FEED_RESPONSE_CACHE: LoadingCache<String, Deferred<Pair<ByteArray, Conte
         }
     })
 
-val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Future<String>> = CacheBuilder
+val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<String>> = CacheBuilder
     .newBuilder()
     .expireAfterWrite(ARTICLE_CACHE_EXPIRY)
-    .build(object : CacheLoader<ArticleIdentifier, Future<String>>() {
-        override fun load(article: ArticleIdentifier): Future<String> {
-            return scope.async<String> {
+    .build(object : CacheLoader<ArticleIdentifier, Deferred<String>>() {
+        override fun load(article: ArticleIdentifier): Deferred<String> {
+            return scope.async {
                 val response = client.get<HttpResponse>(article.link)
                 if (response.status != HttpStatusCode.OK) {
                     throw RuntimeException("invalid status")
@@ -73,7 +78,7 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Future<String>> = Ca
                 }
 
                 Jsoup.clean(soup.toString(), Whitelist.relaxed()).replace(XML11_PATTERN, "")
-            }.asCompletableFuture()
+            }
         }
     })
 
@@ -103,7 +108,7 @@ suspend fun retrieve(feed: String): OutgoingContent {
                 .forEach {
                     val content = SyndContentImpl()
                     content.type = "html"
-                    content.value = it.value.get()
+                    content.value = it.value.await()
 
                     it.key.description = content
                     it.key.contents = emptyList() // listOf(content)

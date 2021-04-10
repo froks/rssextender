@@ -1,30 +1,21 @@
-import ch.qos.logback.classic.util.ContextInitializer
+import ch.qos.logback.classic.LoggerContext
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import io.ktor.application.*
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.client.response.*
-import io.ktor.client.statement.*
-import io.ktor.response.*
-import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.util.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.html.*
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 import java.util.concurrent.TimeUnit
-import ch.qos.logback.classic.LoggerContext
-import org.slf4j.LoggerFactory
 
 val RESPONSE_CACHE: LoadingCache<String, Deferred<OutgoingContent>> = CacheBuilder
     .newBuilder()
