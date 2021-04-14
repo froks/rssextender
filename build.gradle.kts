@@ -16,7 +16,7 @@ repositories {
     maven { url = uri("https://dl.bintray.com/kotlin/ktor") }
 }
 
-val ktorVersion = "1.4.0"
+val ktorVersion = "1.5.3"
 
 dependencies {
     testImplementation(kotlin("test-junit5"))
