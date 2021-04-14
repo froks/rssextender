@@ -55,8 +55,9 @@ fun main() {
                     }
                     call.respond(RESPONSE_CACHE.get(feed).await())
                 } catch (e: Exception) {
-                    logger.error("Error while serving request", e)
-                    throw e
+                    // logback can't handle circular references, which are thrown by coroutines
+                    e.printStackTrace(System.err)
+                    call.respond(HttpStatusCode.InternalServerError)
                 }
             }
         }
