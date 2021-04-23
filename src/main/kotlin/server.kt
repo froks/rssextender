@@ -10,7 +10,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -21,15 +23,16 @@ val RESPONSE_CACHE: LoadingCache<String, Deferred<OutgoingContent>> = CacheBuild
     .newBuilder()
     .expireAfterWrite(5, TimeUnit.MINUTES)
     .build(object : CacheLoader<String, Deferred<OutgoingContent>>() {
-        override fun load(feed: String): Deferred<OutgoingContent> =
-            scope.async { retrieve(feed) }
+        override fun load(feed: String): Deferred<OutgoingContent> {
+            val scope = CoroutineScope(Dispatchers.IO)
+            return scope.async { retrieve(feed) }
+        }
     })
 
 fun main() {
     val lc = LoggerFactory.getILoggerFactory() as LoggerContext
     lc.getLogger("root").level = ch.qos.logback.classic.Level.INFO
 
-    val logger = LoggerFactory.getLogger("Server")
     val port = System.getenv("RSSEXTENDER_PORT")?.toInt() ?: 8080
     val host = System.getenv("RSSEXTENDER_BIND") ?: "0.0.0.0"
     val apiKey = System.getenv("RSSEXTENDER_APIKEY") ?: UUID.randomUUID().toString()

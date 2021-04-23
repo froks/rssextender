@@ -37,13 +37,13 @@ val client = HttpClient {
     }
 }
 
-val scope = CoroutineScope(Dispatchers.IO)
 
 val RAW_FEED_RESPONSE_CACHE: LoadingCache<String, Deferred<Pair<ByteArray, ContentType?>>> = CacheBuilder
     .newBuilder()
     .expireAfterWrite(RAW_FEED_CACHE_EXPIRY)
     .build(object : CacheLoader<String, Deferred<Pair<ByteArray, ContentType?>>>() {
         override fun load(url: String): Deferred<Pair<ByteArray, ContentType?>> {
+            val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
                 val response = client.get<HttpResponse>(url)
                 if (response.status != HttpStatusCode.OK) {
@@ -59,6 +59,7 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<String>> = 
     .expireAfterWrite(ARTICLE_CACHE_EXPIRY)
     .build(object : CacheLoader<ArticleIdentifier, Deferred<String>>() {
         override fun load(article: ArticleIdentifier): Deferred<String> {
+            val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
                 val response = client.get<HttpResponse>(article.link)
                 if (response.status != HttpStatusCode.OK) {
