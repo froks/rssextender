@@ -54,31 +54,39 @@ val RAW_FEED_RESPONSE_CACHE: LoadingCache<String, Deferred<Pair<ByteArray, Conte
         }
     })
 
-val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<String>> = CacheBuilder
+val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResult>> = CacheBuilder
     .newBuilder()
     .expireAfterWrite(ARTICLE_CACHE_EXPIRY)
-    .build(object : CacheLoader<ArticleIdentifier, Deferred<String>>() {
-        override fun load(article: ArticleIdentifier): Deferred<String> {
+    .build(object : CacheLoader<ArticleIdentifier, Deferred<ArticleResult>>() {
+        override fun load(article: ArticleIdentifier): Deferred<ArticleResult> {
             val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
-                val response = client.get<HttpResponse>(article.link)
-                if (response.status != HttpStatusCode.OK) {
-                    throw RuntimeException("invalid status")
+                try {
+                    val response = client.get<HttpResponse>(article.link)
+                    if (response.status != HttpStatusCode.OK) {
+                        return@async ArticleResult(false, "Error while retrieving article:<br>${article.cleanOriginalText}")
+                    }
+
+                    var soup = Jsoup.parse(String(response.readBytes(), Charsets.UTF_8), article.link).allElements
+
+                    val selectors = config.feeds[article.feed]?.selectors ?: emptyList()
+
+                    selectors.forEach {
+                        soup = soup.select(it)
+                    }
+
+                    val removes = config.feeds[article.feed]?.removes ?: emptyList()
+                    removes.forEach {
+                        soup.select(it).remove()
+                    }
+
+                    val text = Jsoup.clean(soup.toString(), Whitelist.relaxed()).replace(XML11_PATTERN, "")
+                    return@async ArticleResult(true, text)
+                } catch (e: Exception) {
+                    e.printStackTrace(System.err)
+                    return@async ArticleResult(false, "Error while retrieving article<br>${article.cleanOriginalText}")
                 }
-                var soup = Jsoup.parse(String(response.readBytes(), Charsets.UTF_8), article.link).allElements
 
-                val selectors = config.feeds[article.feed]?.selectors ?: emptyList()
-
-                selectors.forEach {
-                    soup = soup.select(it)
-                }
-
-                val removes = config.feeds[article.feed]?.removes ?: emptyList()
-                removes.forEach {
-                    soup.select(it).remove()
-                }
-
-                Jsoup.clean(soup.toString(), Whitelist.relaxed()).replace(XML11_PATTERN, "")
             }
         }
     })
@@ -104,12 +112,16 @@ suspend fun retrieve(feed: String): OutgoingContent {
         val nanos = measureNanoTime {
             syndFeed.entries
                 .associateWith {
-                    ARTICLE_RESPONSE_CACHE.get(ArticleIdentifier(feed, it.link))
+                    val text =
+                        it.contents.firstOrNull { it.type == "html" }?.value ?: it.contents.firstOrNull()?.value ?: ""
+                    ARTICLE_RESPONSE_CACHE.get(ArticleIdentifier(feed, it.link, text))
                 }
                 .forEach {
                     val content = SyndContentImpl()
                     content.type = "html"
-                    content.value = it.value.await()
+                    val articleResult = it.value.await()
+                    content.value = articleResult.text
+                    ARTICLE_RESPONSE_CACHE.invalidate(it.key)
 
                     it.key.description = content
                     it.key.contents = emptyList() // listOf(content)
@@ -130,6 +142,16 @@ suspend fun retrieve(feed: String): OutgoingContent {
 data class ArticleIdentifier(
     val feed: String,
     val link: String,
+    val originalText: String,
+) {
+    val cleanOriginalText
+        get() =
+            Jsoup.clean(originalText, Whitelist.relaxed()).replace(XML11_PATTERN, "")
+}
+
+data class ArticleResult(
+    val ok: Boolean,
+    val text: String,
 )
 
 suspend fun main() {
@@ -137,4 +159,6 @@ suspend fun main() {
 //    val s = p.select(".article-content")
 //    println(Jsoup.clean(s.toString(), Whitelist.basicWithImages()).replace(XML11_PATTERN, ""))
     println(String((retrieve("heise") as ByteArrayContent).bytes()))
+    println(String((retrieve("engadget") as ByteArrayContent).bytes()))
 }
+
