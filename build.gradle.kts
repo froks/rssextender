@@ -33,7 +33,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.jsoup:jsoup:1.13.1")
-    implementation("com.rometools:rome:1.15.0")
+    implementation("com.rometools:rome:1.16.0")
     implementation("com.charleskorn.kaml:kaml:0.34.0")
     implementation(kotlin("stdlib-jdk8"))
 }
