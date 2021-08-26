@@ -17,7 +17,7 @@ repositories {
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
 }
 
-val ktorVersion = "1.6.2"
+val ktorVersion = "1.6.3"
 
 val junitJupiterVersion = "5.7.2"
 
