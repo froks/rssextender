@@ -32,7 +32,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("org.jsoup:jsoup:1.15.1")
     implementation("com.rometools:rome:1.18.0")
     implementation("com.charleskorn.kaml:kaml:0.44.0")
     implementation(kotlin("stdlib-jdk8"))
