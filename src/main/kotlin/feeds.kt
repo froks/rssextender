@@ -17,7 +17,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import org.jsoup.Jsoup
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import java.io.ByteArrayInputStream
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
@@ -80,7 +80,7 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResu
                         soup.select(it).remove()
                     }
 
-                    val text = Jsoup.clean(soup.toString(), Whitelist.relaxed()).replace(XML11_PATTERN, "")
+                    val text = Jsoup.clean(soup.toString(), Safelist.relaxed()).replace(XML11_PATTERN, "")
                     return@async ArticleResult(true, text)
                 } catch (e: Exception) {
                     e.printStackTrace(System.err)
@@ -120,6 +120,7 @@ suspend fun retrieve(feed: String): OutgoingContent {
                     val content = SyndContentImpl()
                     content.type = "html"
                     val articleResult = it.value.await()
+//                    println("url: ${it.key.link}: ${articleResult.ok} ${articleResult.text}")
                     content.value = articleResult.text
                     ARTICLE_RESPONSE_CACHE.invalidate(it.key)
 
@@ -146,7 +147,7 @@ data class ArticleIdentifier(
 ) {
     val cleanOriginalText
         get() =
-            Jsoup.clean(originalText, Whitelist.relaxed()).replace(XML11_PATTERN, "")
+            Jsoup.clean(originalText, Safelist.relaxed()).replace(XML11_PATTERN, "")
 }
 
 data class ArticleResult(

@@ -10,7 +10,6 @@ plugins {
 group = "de.debugco"
 
 repositories {
-    jcenter()
     mavenCentral()
     maven { url = uri("https://dl.bintray.com/kotlin/kotlinx") }
     maven { url = uri("https://dl.bintray.com/kotlin/ktor") }
@@ -47,7 +46,7 @@ tasks.withType<KotlinCompile>() {
 }
 
 application {
-    mainClassName = "ServerKt"
+    mainClass.set("ServerKt")
 }
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
