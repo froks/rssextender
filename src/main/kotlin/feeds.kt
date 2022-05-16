@@ -7,7 +7,7 @@ import com.rometools.rome.io.SyndFeedInput
 import com.rometools.rome.io.SyndFeedOutput
 import com.rometools.rome.io.XmlReader
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -45,7 +45,7 @@ val RAW_FEED_RESPONSE_CACHE: LoadingCache<String, Deferred<Pair<ByteArray, Conte
         override fun load(url: String): Deferred<Pair<ByteArray, ContentType?>> {
             val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
-                val response = client.get<HttpResponse>(url)
+                val response = client.get(url)
                 if (response.status != HttpStatusCode.OK) {
                     throw RuntimeException("Server didn't respond with OK")
                 }
@@ -62,7 +62,7 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResu
             val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
                 try {
-                    val response = client.get<HttpResponse>(article.link)
+                    val response = client.get(article.link)
                     if (response.status != HttpStatusCode.OK) {
                         return@async ArticleResult(false, "Error while retrieving article:<br>${article.cleanOriginalText}")
                     }
