@@ -31,7 +31,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.5")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("org.jsoup:jsoup:1.15.4")
-    implementation("com.rometools:rome:1.19.0")
+    implementation("com.rometools:rome:2.0.0")
     implementation("com.charleskorn.kaml:kaml:0.51.0")
     implementation(kotlin("stdlib-jdk8"))
 }
