@@ -28,7 +28,7 @@ dependencies {
     implementation("io.ktor:ktor-server-default-headers:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("com.google.guava:guava:32.1.3-jre")
     implementation("org.jsoup:jsoup:1.16.2")
     implementation("com.rometools:rome:2.1.0")
