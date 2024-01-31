@@ -13,7 +13,7 @@ repositories {
     mavenCentral()
 }
 
-val ktorVersion = "2.3.7"
+val ktorVersion = "2.3.8"
 
 val junitJupiterVersion = "5.10.1"
 
