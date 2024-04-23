@@ -32,7 +32,7 @@ dependencies {
     implementation("com.google.guava:guava:33.1.0-jre")
     implementation("org.jsoup:jsoup:1.17.2")
     implementation("com.rometools:rome:2.1.0")
-    implementation("com.charleskorn.kaml:kaml:0.58.0")
+    implementation("com.charleskorn.kaml:kaml:0.59.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 
