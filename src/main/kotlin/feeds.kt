@@ -67,20 +67,22 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResu
                         return@async ArticleResult(false, "Error while retrieving article:<br>${article.cleanOriginalText}")
                     }
 
-                    var soup = Jsoup.parse(String(response.readBytes(), Charsets.UTF_8), article.link).allElements
+                    var soup = Jsoup.parse(String(response.readRawBytes(), Charsets.UTF_8), article.link).allElements
 
                     val selectors = config.feeds[article.feed]?.selectors ?: emptyList()
 
-                    selectors.forEach {
-                        soup = soup.select(it)
+                    val soups = selectors.map {
+                        soup.select(it)
                     }
 
                     val removes = config.feeds[article.feed]?.removes ?: emptyList()
                     removes.forEach {
-                        soup.select(it).remove()
+                        soups.forEach {
+                            s -> s.select(it).remove()
+                        }
                     }
 
-                    val text = Jsoup.clean(soup.toString(), Safelist.relaxed()).replace(XML11_PATTERN, "")
+                    val text = Jsoup.clean(soups.joinToString { it.toString() }, Safelist.relaxed()).replace(XML11_PATTERN, "")
                     return@async ArticleResult(true, text)
                 } catch (e: Exception) {
                     e.printStackTrace(System.err)
@@ -160,6 +162,6 @@ suspend fun main() {
 //    val s = p.select(".article-content")
 //    println(Jsoup.clean(s.toString(), Whitelist.basicWithImages()).replace(XML11_PATTERN, ""))
     println(String((retrieve("heise") as ByteArrayContent).bytes()))
-    println(String((retrieve("engadget") as ByteArrayContent).bytes()))
+//    println(String((retrieve("engadget") as ByteArrayContent).bytes()))
 }
 
