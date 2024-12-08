@@ -2,8 +2,7 @@ feeds:
   heise:
     url: https://www.heise.de/rss/heise-atom.xml
     selectors:
-      - div.article-content
-      - div.StoryContent
+      - div.article-content, div.StoryContent
     removes:
       - footer
       - a-collapse

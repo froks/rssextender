@@ -62,6 +62,9 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResu
             val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
                 try {
+                    if (!article.link.contains("radar")) {
+                        return@async ArticleResult(false, "")
+                    }
                     val response = client.get(article.link)
                     if (response.status != HttpStatusCode.OK) {
                         return@async ArticleResult(false, "Error while retrieving article:<br>${article.cleanOriginalText}")
@@ -71,18 +74,16 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResu
 
                     val selectors = config.feeds[article.feed]?.selectors ?: emptyList()
 
-                    val soups = selectors.map {
-                        soup.select(it)
+                    selectors.forEach {
+                        soup = soup.select(it)
                     }
 
                     val removes = config.feeds[article.feed]?.removes ?: emptyList()
                     removes.forEach {
-                        soups.forEach {
-                            s -> s.select(it).remove()
-                        }
+                        soup.select(it).remove()
                     }
 
-                    val text = Jsoup.clean(soups.joinToString { it.toString() }, Safelist.relaxed()).replace(XML11_PATTERN, "")
+                    val text = Jsoup.clean(soup.toString(), Safelist.relaxed()).replace(XML11_PATTERN, "")
                     return@async ArticleResult(true, text)
                 } catch (e: Exception) {
                     e.printStackTrace(System.err)
