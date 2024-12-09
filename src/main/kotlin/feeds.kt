@@ -62,9 +62,6 @@ val ARTICLE_RESPONSE_CACHE: LoadingCache<ArticleIdentifier, Deferred<ArticleResu
             val scope = CoroutineScope(Dispatchers.IO)
             return scope.async {
                 try {
-                    if (!article.link.contains("radar")) {
-                        return@async ArticleResult(false, "")
-                    }
                     val response = client.get(article.link)
                     if (response.status != HttpStatusCode.OK) {
                         return@async ArticleResult(false, "Error while retrieving article:<br>${article.cleanOriginalText}")
