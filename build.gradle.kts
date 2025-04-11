@@ -15,7 +15,7 @@ repositories {
 
 val ktorVersion = "3.1.2"
 
-val junitJupiterVersion = "5.12.1"
+val junitJupiterVersion = "5.12.2"
 
 dependencies {
     testImplementation(kotlin("test-junit5"))
