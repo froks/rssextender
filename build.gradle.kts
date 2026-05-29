@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.serialization") version "2.1.20"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.serialization") version "2.3.21"
     id("com.gradleup.shadow") version "9.4.1"
     application
 }
@@ -11,7 +11,7 @@ repositories {
     mavenCentral()
 }
 
-val ktorVersion = "3.2.1"
+val ktorVersion = "3.5.0"
 
 val junitJupiterVersion = "6.1.0"
 
