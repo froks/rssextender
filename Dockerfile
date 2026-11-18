@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:alpine
+FROM amazoncorretto:25-alpine
 
 RUN set -xe && \
         apk update && apk upgrade
